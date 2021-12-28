@@ -1,0 +1,308 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Expense Calculator</title>
+        <style>
+            * {
+                margin: 0;
+                padding: 0;
+                box-sizing: border-box;
+            }
+
+            [v-cloak] {
+                display: none;
+            }
+
+            #app {
+                width: 100%;
+                min-height: 100vh;
+                padding: 10px 20px 50px;
+                font-size: max(14px, 1vw);
+                background-color: #eee;
+                font-family: 'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif;
+            }
+
+            .header {
+                padding: 20px 0 30px;
+            }
+
+            .form {
+                overflow: hidden;
+                width: 50%;
+                margin: 10px auto 50px;
+                border: 1px solid #333;
+                border-radius: 8px;
+                padding: 10px 20px 20px;
+            }
+
+            #total {
+                overflow: hidden;
+                width: 50%;
+                margin: 10px auto 50px;
+                padding: 10px 0;
+            }
+
+            input {
+                display: block;
+                width: 75%;
+                margin: 10px 0;
+                padding: 10px 20px;
+                border-radius: 8px;
+                border: 2px solid #333;
+            }
+
+            input:active,
+            input:focus {
+                outline: 0;
+                border: 2px solid #0080b3;
+            }
+
+            input:hover {
+                cursor: text;
+            }
+
+            .add-button {
+                padding: 10px 20px;
+                border: 1px solid #123;
+                background-color: #123;
+                color: #eee;
+                border-radius: 5px;
+                box-shadow: 0px 2px 4px #123;
+                cursor: pointer;
+            }
+
+            .dollar-input {
+                position: relative;
+                display: flex;
+                align-items: center;
+                justify-content: flex-start;
+                width: 100%;
+            }
+
+            .dollar-input::before {
+                content: '$';
+                position: absolute;
+                left: 10px;
+            }
+
+            .expense-table {
+                border: 1px solid #333;
+                width: 100%;
+                text-align: center;
+                margin: 5px 0 20px;
+                padding: 20px;
+                background-color: #fff;
+                overflow: auto;
+                border-radius: 5px;
+            }
+
+            .expense-table th {
+                text-decoration: underline;
+            }
+
+            .expense-table > tbody > tr:nth-child(odd) {
+                background-color: #333;
+                color: #ddd;
+            }
+
+            .expense-table > tbody > tr:nth-child(even) {
+                background-color: #ddd;
+                color: #333;
+            }
+
+            .expense-table td,
+            .expense-table th {
+                text-align: left;
+                padding: 10px;
+            }
+
+            .cost-cell {
+                width: max(10vw, 100px);
+            }
+
+            .small {
+                font-size: 80%;
+                color: #777;
+                margin-bottom: 10px;
+            }
+
+            .red {
+                font-size: 120%;
+                color: #f55;
+            }
+
+            .center {
+                text-align: center;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app" v-cloak>
+            <h1 class="center header">Weekly Expense/Savings Calculator</h1>
+            <div class="form">
+                <h4>Add Monthly Expense:</h4>
+                <input type="text" v-model="monthlyExpenseName" />
+                <div class="dollar-input">
+                    <input type="number" v-model.number="monthlyExpenseCost" />
+                </div>
+                <button class="add-button" @click="addMonthlyExpense">Add Monthly Expense</button>
+            </div>
+
+            <div class="form">
+                <h4>Add Annual (One-Time) Expense:</h4>
+                <input type="text" v-model="oneTimeExpenseName" />
+                <div class="dollar-input">
+                    <input type="number" v-model.number="oneTimeExpenseCost" />
+                </div>
+                <button class="add-button" @click="addOneTimeExpense">Add Annual Expense</button>
+            </div>
+
+            <div id="expenses" class="form" v-if="oneTimeExpenses.length || monthlyExpenses.length">
+                <div id="one-time" v-if="oneTimeExpenses.length">
+                    <h3>Annual Expenses</h3>
+                    <table class="expense-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th class="cost-cell">Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(expense, idx) in oneTimeExpenses" :key="idx">
+                                <td>{{expense.name}}</td>
+                                <td class="cost-cell">${{expense.cost}} / year</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div id="monthly" v-if="monthlyExpenses.length">
+                    <h3>Monthly Expenses</h3>
+                    <table class="expense-table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th class="cost-cell">Cost</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="(expense, idx) in monthlyExpenses" :key="idx">
+                                <td>{{expense.name}}</td>
+                                <td class="cost-cell">${{expense.cost}} / month</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="total" v-if="total !== 0">
+                <div id="totals">
+                    <table class="expense-table">
+                        <thead>
+                            <tr>
+                                <th>Payment Interval</th>
+                                <th>Amount to Save</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Weekly</td>
+                                <td>${{ (+total + 0.01).toFixed(2) }}</td>
+                            </tr>
+                            <tr>
+                                <td>Bi-Weekly</td>
+                                <td>${{ ((+total + 0.01) * 2).toFixed(2) }}</td>
+                            </tr>
+                            <tr>
+                                <td>Monthly</td>
+                                <td>${{ ((+total + 0.01) * 52 / 12).toFixed(2) }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            </div>
+        </div>
+        <script src="https://unpkg.com/vue@next"></script>
+        <script>
+            const ref = Vue.ref;
+            const onMounted = Vue.onMounted;
+
+            const app = Vue.createApp({
+                setup() {
+                    const total = ref(0);
+
+                    const monthlyExpenses = ref([]);
+                    const oneTimeExpenses = ref([]);
+
+                    const monthlyExpenseName = ref(null);
+                    const monthlyExpenseCost = ref(null);
+                    const oneTimeExpenseName = ref(null);
+                    const oneTimeExpenseCost = ref(null);
+
+                    const addMonthlyExpense = () => {
+                        if (!monthlyExpenseName.value || !monthlyExpenseCost.value) return;
+
+                        total.value += (monthlyExpenseCost.value * 12) / 52;
+
+                        monthlyExpenses.value.push({
+                            name: monthlyExpenseName.value,
+                            cost: monthlyExpenseCost.value,
+                        });
+
+                        monthlyExpenseCost.value = null;
+                        monthlyExpenseName.value = null;
+
+                        localStorage.setItem('monthly', JSON.stringify(monthlyExpenses.value));
+                        localStorage.setItem('total', total.value);
+                    };
+
+                    const addOneTimeExpense = () => {
+                        if (!oneTimeExpenseName.value || !oneTimeExpenseCost.value) return;
+
+                        total.value += oneTimeExpenseCost.value / 52;
+
+                        oneTimeExpenses.value.push({
+                            name: oneTimeExpenseName.value,
+                            cost: oneTimeExpenseCost.value,
+                        });
+
+                        oneTimeExpenseCost.value = null;
+                        oneTimeExpenseName.value = null;
+
+                        localStorage.setItem('oneTime', JSON.stringify(oneTimeExpenses.value));
+                        localStorage.setItem('total', total.value);
+                    };
+
+                    onMounted(() => {
+                        console.log('here');
+                        let monthly = localStorage.getItem('monthly');
+                        let oneTime = localStorage.getItem('oneTime');
+                        let storedTotal = localStorage.getItem('total');
+
+                        total.value = storedTotal || 0;
+                        monthlyExpenses.value = JSON.parse(monthly) || [];
+                        oneTimeExpenses.value = JSON.parse(oneTime) || [];
+                    });
+
+                    return {
+                        total,
+                        oneTimeExpenses,
+                        monthlyExpenses,
+                        addOneTimeExpense,
+                        addMonthlyExpense,
+                        oneTimeExpenseName,
+                        monthlyExpenseName,
+                        oneTimeExpenseCost,
+                        monthlyExpenseCost,
+                    };
+                },
+            });
+
+            app.mount('#app');
+        </script>
+    </body>
+</html>
