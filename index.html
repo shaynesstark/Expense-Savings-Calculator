@@ -30,9 +30,13 @@
                 top: 16px;
                 right: 32px;
                 color: #ccc;
+                z-index: 9999;
+                cursor: pointer;
+                position: fixed;
                 padding: 8px 16px;
-                position: absolute;
-                border: 1px solid #ccc;
+                border-radius: 8px;
+                border: 1px solid #333;
+                background-color: #333;
             }
 
             .header {
@@ -159,7 +163,7 @@
                 <div class="dollar-input">
                     <input type="number" v-model.number="monthlyExpenseCost" />
                 </div>
-                <button class="add-button" @click="addMonthlyExpense">Add Monthly Expense</button>
+                <button class="add-button" @click.prevent="addMonthlyExpense">Add Monthly Expense</button>
             </div>
 
             <div class="form">
@@ -168,7 +172,7 @@
                 <div class="dollar-input">
                     <input type="number" v-model.number="oneTimeExpenseCost" />
                 </div>
-                <button class="add-button" @click="addOneTimeExpense">Add Annual Expense</button>
+                <button class="add-button" @click.prevent="addOneTimeExpense">Add Annual Expense</button>
             </div>
 
             <div id="expenses" class="form" v-if="oneTimeExpenses.length || monthlyExpenses.length">
