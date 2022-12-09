@@ -159,18 +159,18 @@
             <h1 class="center header">Expense/Savings Calculator</h1>
             <div class="form">
                 <h4>Add Monthly Expense:</h4>
-                <input type="text" v-model="monthlyExpenseName" />
+                <input type="text" placeholder="Item Name" v-model="monthlyExpenseName" />
                 <div class="dollar-input">
-                    <input type="number" v-model.number="monthlyExpenseCost" />
+                    <input type="number" placeholder="Item Monthly Cost ($)" v-model.number="monthlyExpenseCost" />
                 </div>
                 <button class="add-button" @click.prevent="addMonthlyExpense">Add Monthly Expense</button>
             </div>
 
             <div class="form">
                 <h4>Add Annual (One-Time) Expense:</h4>
-                <input type="text" v-model="oneTimeExpenseName" />
+                <input type="text" placeholder="Item Name" v-model="oneTimeExpenseName" />
                 <div class="dollar-input">
-                    <input type="number" v-model.number="oneTimeExpenseCost" />
+                    <input type="number" placeholder="Item Annual Cost ($)" v-model.number="oneTimeExpenseCost" />
                 </div>
                 <button class="add-button" @click.prevent="addOneTimeExpense">Add Annual Expense</button>
             </div>
